@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gen:api": "bash scripts/gen-api.sh",
+    "gen:api:check": "bash scripts/check-api-drift.sh"
   },
   "dependencies": {
     "next": "^15.5.7",
@@ -21,6 +23,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^15.5.7",
+    "openapi-typescript": "^7.8.0",
     "typescript": "^5"
   }
 }
