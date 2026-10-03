@@ -1,0 +1,42 @@
+.markdown {
+  line-height: 1.7;
+  color: #222;
+}
+
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown pre,
+.markdown blockquote {
+  margin: 0 0 1rem;
+}
+
+.markdown a {
+  color: #111;
+}
+
+.markdown pre {
+  overflow-x: auto;
+  padding: 0.85rem 1rem;
+  background: #f3f3f3;
+  border-radius: 6px;
+}
+
+.markdown code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.9em;
+}
+
+.markdown :not(pre) > code {
+  padding: 0.1em 0.35em;
+  background: #f3f3f3;
+  border-radius: 4px;
+}

@@ -10,6 +10,7 @@ Requisitos: Node.js 22+
 
 ```bash
 npm install
+cp .env.example .env
 npm run dev
 ```
 
@@ -34,9 +35,11 @@ OPENAPI_URL=http://localhost:8080/openapi.json npm run gen:api
 
 A CI executa `gen:api:check` para impedir dessincronia entre snapshot e tipos.
 
-## Status
+## Posts públicos
 
-Scaffold inicial (M1) — home placeholder. Conteúdo, tema, widgets e SEO vêm nas próximas issues.
+A home lista `GET /api/v1/public/posts`. Cada post abre em `/posts/{slug}` via `GET /api/v1/public/posts/{slug}`. Só entram posts `published`.
+
+`API_BASE_URL` (ver `.env.example`) é a base da API. O fetch usa ISR de 60 segundos. Na Vercel, defina `API_BASE_URL` antes do build. Ex.: `https://repost-manager-backend.onrender.com`.
 
 ## Licença
 

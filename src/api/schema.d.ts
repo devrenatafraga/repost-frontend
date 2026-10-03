@@ -12,7 +12,28 @@ export interface paths {
             cookie?: never;
         };
         /** Health check */
-        get: operations["getHealth"];
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Service is up */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -21,7 +42,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/admin/": {
+    "/api/v1/public/posts": {
         parameters: {
             query?: never;
             header?: never;
@@ -29,10 +50,36 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Admin API surface
-         * @description Stub endpoint for the authenticated admin surface.
+         * List published posts
+         * @description Anonymous list of published posts for the default blog, newest first.
          */
-        get: operations["getAdminSurface"];
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Published posts */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["dev.repost.publicapi.posts.PublicPostListResponse"];
+                    };
+                };
+                /** @description Database or default blog unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -41,7 +88,59 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/public/": {
+    "/api/v1/public/posts/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get published post by slug */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Published post */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["dev.repost.publicapi.posts.PublicPostResponse"];
+                    };
+                };
+                /** @description Missing or not published */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Database or default blog unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public": {
         parameters: {
             query?: never;
             header?: never;
@@ -52,7 +151,406 @@ export interface paths {
          * Public API surface
          * @description Stub endpoint for the anonymous, cacheable public surface.
          */
-        get: operations["getPublicSurface"];
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Surface metadata */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Admin login
+         * @description Authenticates with email/password. Returns access JWT; sets refresh cookie.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["dev.repost.admin.auth.LoginRequest"];
+                };
+            };
+            responses: {
+                /** @description Authenticated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["dev.repost.admin.auth.TokenResponse"];
+                    };
+                };
+                /** @description Invalid credentials */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Rate limited */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh access token */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description New access token */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["dev.repost.admin.auth.TokenResponse"];
+                    };
+                };
+                /** @description Missing or invalid refresh cookie */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Rate limited */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Admin logout */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Logged out */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List admin posts */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Optional filter: draft | scheduled | published */
+                    status?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Posts for the default blog */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["dev.repost.admin.posts.PostListResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create post */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["dev.repost.admin.posts.UpsertPostRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["dev.repost.admin.posts.PostResponse"];
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Slug already exists */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/posts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get post by id */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Post */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["dev.repost.admin.posts.PostResponse"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        /** Update post */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["dev.repost.admin.posts.UpsertPostRequest"];
+                };
+            };
+            responses: {
+                /** @description Updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["dev.repost.admin.posts.PostResponse"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Slug already exists */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        /** Delete post */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin API surface
+         * @description Stub endpoint for the authenticated admin surface.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Surface metadata */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            [key: string]: string;
+                        };
+                    };
+                };
+                /** @description Missing or invalid Bearer JWT */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -64,7 +562,106 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        /** PublicPostResponse */
+        "dev.repost.publicapi.posts.PublicPostResponse": {
+            /** String */
+            contentMd: string;
+            /** String */
+            coverMediaId?: null | string;
+            /** String */
+            excerpt?: null | string;
+            /** String */
+            id: string;
+            /** String */
+            publishedAt?: null | string;
+            /**
+             * Int
+             * Format: int32
+             */
+            readingTime?: null | number;
+            /** String */
+            slug: string;
+            /** String */
+            title: string;
+            /** String */
+            updatedAt: string;
+        };
+        /** PublicPostListResponse */
+        "dev.repost.publicapi.posts.PublicPostListResponse": {
+            /** List<PublicPostResponse> */
+            items: components["schemas"]["dev.repost.publicapi.posts.PublicPostResponse"][];
+        };
+        /** LoginRequest */
+        "dev.repost.admin.auth.LoginRequest": {
+            /** String */
+            email: string;
+            /** String */
+            password: string;
+        };
+        /** TokenResponse */
+        "dev.repost.admin.auth.TokenResponse": {
+            /** String */
+            accessToken: string;
+            /**
+             * Long
+             * Format: int64
+             */
+            expiresIn: number;
+            /** String */
+            tokenType: string;
+        };
+        /** PostResponse */
+        "dev.repost.admin.posts.PostResponse": {
+            /** String */
+            blogId: string;
+            /** String */
+            contentMd: string;
+            /** String */
+            coverMediaId?: null | string;
+            /** String */
+            createdAt: string;
+            /** String */
+            excerpt?: null | string;
+            /** String */
+            id: string;
+            /** String */
+            publishedAt?: null | string;
+            /**
+             * Int
+             * Format: int32
+             */
+            readingTime?: null | number;
+            /** String */
+            slug: string;
+            /** String */
+            status: string;
+            /** String */
+            title: string;
+            /** String */
+            updatedAt: string;
+        };
+        /** PostListResponse */
+        "dev.repost.admin.posts.PostListResponse": {
+            /** List<PostResponse> */
+            items: components["schemas"]["dev.repost.admin.posts.PostResponse"][];
+        };
+        /** UpsertPostRequest */
+        "dev.repost.admin.posts.UpsertPostRequest": {
+            /** String */
+            contentMd: string;
+            /** String */
+            excerpt?: null | string;
+            /** String */
+            publishedAt?: null | string;
+            /** String */
+            slug: string;
+            /** String */
+            status: string;
+            /** String */
+            title: string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -72,71 +669,4 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export interface operations {
-    getHealth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Service is up */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: string;
-                    };
-                };
-            };
-        };
-    };
-    getAdminSurface: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Surface metadata */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: string;
-                    };
-                };
-            };
-        };
-    };
-    getPublicSurface: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Surface metadata */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: string;
-                    };
-                };
-            };
-        };
-    };
-}
+export type operations = Record<string, never>;

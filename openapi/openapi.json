@@ -2,84 +2,747 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Repost Manager API",
-    "version": "1.0.0",
-    "description": "Contract for admin and public surfaces (ADR-0003)."
+    "description": "Contract for admin and public surfaces (ADR-0003).",
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "url": "/"
   },
   "servers": [
     {
       "url": "http://localhost:8080"
     }
   ],
-  "tags": [
-    { "name": "system" },
-    { "name": "admin" },
-    { "name": "public" }
-  ],
+  "tags": [],
   "paths": {
     "/health": {
       "get": {
-        "tags": ["system"],
+        "tags": [
+          "system"
+        ],
         "summary": "Health check",
-        "operationId": "getHealth",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Service is up",
+            "headers": {},
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": { "type": "string" },
-                  "example": { "status": "ok" }
+                  "additionalProperties": {
+                    "type": "string",
+                    "title": "String"
+                  },
+                  "title": "Map<String,String>"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "status": "ok"
+                    }
+                  }
                 }
               }
             }
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/api/v1/admin/": {
+    "/api/v1/public/posts": {
       "get": {
-        "tags": ["admin"],
-        "summary": "Admin API surface",
-        "description": "Stub endpoint for the authenticated admin surface.",
-        "operationId": "getAdminSurface",
+        "tags": [
+          "public"
+        ],
+        "summary": "List published posts",
+        "description": "Anonymous list of published posts for the default blog, newest first.",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "Surface metadata",
+            "description": "Published posts",
+            "headers": {},
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": { "type": "string" },
-                  "example": { "surface": "admin", "version": "v1" }
+                  "$ref": "#/components/schemas/dev.repost.publicapi.posts.PublicPostListResponse"
                 }
               }
             }
+          },
+          "503": {
+            "description": "Database or default blog unavailable",
+            "headers": {}
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/api/v1/public/": {
+    "/api/v1/public/posts/{slug}": {
       "get": {
-        "tags": ["public"],
+        "tags": [
+          "public"
+        ],
+        "summary": "Get published post by slug",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "deprecated": false,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "String"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Published post",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dev.repost.publicapi.posts.PublicPostResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Missing or not published",
+            "headers": {}
+          },
+          "503": {
+            "description": "Database or default blog unavailable",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/public": {
+      "get": {
+        "tags": [
+          "public"
+        ],
         "summary": "Public API surface",
         "description": "Stub endpoint for the anonymous, cacheable public surface.",
-        "operationId": "getPublicSurface",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Surface metadata",
+            "headers": {},
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": { "type": "string" },
-                  "example": { "surface": "public", "version": "v1" }
+                  "additionalProperties": {
+                    "type": "string",
+                    "title": "String"
+                  },
+                  "title": "Map<String,String>"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "surface": "public",
+                      "version": "v1"
+                    }
+                  }
                 }
               }
             }
           }
-        }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/admin/auth/login": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin login",
+        "description": "Authenticates with email/password. Returns access JWT; sets refresh cookie.",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/dev.repost.admin.auth.LoginRequest"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dev.repost.admin.auth.TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "headers": {}
+          },
+          "429": {
+            "description": "Rate limited",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/admin/auth/refresh": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Refresh access token",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "New access token",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dev.repost.admin.auth.TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid refresh cookie",
+            "headers": {}
+          },
+          "429": {
+            "description": "Rate limited",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/admin/auth/logout": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Logged out",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/admin/posts": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List admin posts",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Optional filter: draft | scheduled | published",
+            "required": false,
+            "deprecated": false,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "String"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Posts for the default blog",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dev.repost.admin.posts.PostListResponse"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Create post",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/dev.repost.admin.posts.UpsertPostRequest"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dev.repost.admin.posts.PostResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "headers": {}
+          },
+          "409": {
+            "description": "Slug already exists",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/admin/posts/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get post by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "deprecated": false,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "String"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dev.repost.admin.posts.PostResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Update post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "deprecated": false,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "String"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/dev.repost.admin.posts.UpsertPostRequest"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dev.repost.admin.posts.PostResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "headers": {}
+          },
+          "409": {
+            "description": "Slug already exists",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Delete post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "deprecated": false,
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "title": "String"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted",
+            "headers": {}
+          },
+          "404": {
+            "description": "Not found",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/admin": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin API surface",
+        "description": "Stub endpoint for the authenticated admin surface.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Surface metadata",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "title": "String"
+                  },
+                  "title": "Map<String,String>"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "surface": "admin",
+                      "version": "v1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Bearer JWT",
+            "headers": {}
+          }
+        },
+        "deprecated": false
       }
     }
-  }
+  },
+  "components": {
+    "schemas": {
+      "dev.repost.publicapi.posts.PublicPostResponse": {
+        "type": "object",
+        "properties": {
+          "contentMd": {
+            "type": "string",
+            "title": "String"
+          },
+          "coverMediaId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "title": "String"
+          },
+          "excerpt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "title": "String"
+          },
+          "id": {
+            "type": "string",
+            "title": "String"
+          },
+          "publishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "title": "String"
+          },
+          "readingTime": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32",
+            "title": "Int"
+          },
+          "slug": {
+            "type": "string",
+            "title": "String"
+          },
+          "title": {
+            "type": "string",
+            "title": "String"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "String"
+          }
+        },
+        "required": [
+          "contentMd",
+          "id",
+          "slug",
+          "title",
+          "updatedAt"
+        ],
+        "title": "PublicPostResponse"
+      },
+      "dev.repost.publicapi.posts.PublicPostListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/dev.repost.publicapi.posts.PublicPostResponse"
+            },
+            "title": "List<PublicPostResponse>"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "PublicPostListResponse"
+      },
+      "dev.repost.admin.auth.LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "String"
+          },
+          "password": {
+            "type": "string",
+            "title": "String"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "dev.repost.admin.auth.TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "title": "String"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "format": "int64",
+            "title": "Long"
+          },
+          "tokenType": {
+            "type": "string",
+            "title": "String"
+          }
+        },
+        "required": [
+          "accessToken",
+          "expiresIn",
+          "tokenType"
+        ],
+        "title": "TokenResponse"
+      },
+      "dev.repost.admin.posts.PostResponse": {
+        "type": "object",
+        "properties": {
+          "blogId": {
+            "type": "string",
+            "title": "String"
+          },
+          "contentMd": {
+            "type": "string",
+            "title": "String"
+          },
+          "coverMediaId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "title": "String"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "String"
+          },
+          "excerpt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "title": "String"
+          },
+          "id": {
+            "type": "string",
+            "title": "String"
+          },
+          "publishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "title": "String"
+          },
+          "readingTime": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32",
+            "title": "Int"
+          },
+          "slug": {
+            "type": "string",
+            "title": "String"
+          },
+          "status": {
+            "type": "string",
+            "title": "String"
+          },
+          "title": {
+            "type": "string",
+            "title": "String"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "String"
+          }
+        },
+        "required": [
+          "blogId",
+          "contentMd",
+          "createdAt",
+          "id",
+          "slug",
+          "status",
+          "title",
+          "updatedAt"
+        ],
+        "title": "PostResponse"
+      },
+      "dev.repost.admin.posts.PostListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/dev.repost.admin.posts.PostResponse"
+            },
+            "title": "List<PostResponse>"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "PostListResponse"
+      },
+      "dev.repost.admin.posts.UpsertPostRequest": {
+        "type": "object",
+        "properties": {
+          "contentMd": {
+            "type": "string",
+            "title": "String"
+          },
+          "excerpt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "title": "String"
+          },
+          "publishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "title": "String"
+          },
+          "slug": {
+            "type": "string",
+            "title": "String"
+          },
+          "status": {
+            "type": "string",
+            "title": "String"
+          },
+          "title": {
+            "type": "string",
+            "title": "String"
+          }
+        },
+        "required": [
+          "contentMd",
+          "slug",
+          "status",
+          "title"
+        ],
+        "title": "UpsertPostRequest"
+      }
+    },
+    "examples": {}
+  },
+  "webhooks": {}
 }
